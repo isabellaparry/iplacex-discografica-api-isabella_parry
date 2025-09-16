@@ -1,18 +1,15 @@
-#STAGE 1
-FROM gradle:jdk21 as builder
-
+# STAGE 1
+FROM gradle:8.10.2-jdk21 AS builder
 WORKDIR /app
 
-COPY ./build.gradle
-COPY ./settings.gradle
+COPY build.gradle .          
+COPY settings.gradle .       
+COPY src ./src               
 
-COPY src ./src
+RUN gradle clean bootJar --no-daemon -x test
 
-RUN gradle build --no-daemon
-
-#STAGE 2
+# STAGE 2
 FROM openjdk:21-jdk-slim
-
 WORKDIR /app
 
 COPY --from=builder /app/build/libs/*.jar app.jar
